@@ -2199,6 +2199,9 @@
     "message": "View SSH key",
     "description": "Header for view SSH key item type"
   },
+  "chooseItemToAdd": {
+    "message": "Choose item to add"
+  },
   "passwordHistory": {
     "message": "Password history"
   },
