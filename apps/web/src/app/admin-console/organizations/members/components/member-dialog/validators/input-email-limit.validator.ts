@@ -46,6 +46,63 @@ export function getEmailBatchLimit(organization: Organization, occupiedSeatCount
   return Math.min(batchLimit, Math.max(0, remainingSeats));
 }
 
+/**
+ * If the organization doesn't allow additional seat options, this checks if the seat limit has been reached when adding
+ * new users
+ * @param organization An object representing the organization
+ * @param allOrganizationUserEmails An array of strings with existing user email addresses
+ * @param errorMessage A localized string to display if validation fails
+ * @param occupiedSeatCount The current count of active users occupying the organization's seats.
+ * @returns A function that validates an `AbstractControl` and returns `ValidationErrors` or `null`
+ */
+export function orgSeatLimitReachedValidator(
+  organization: Organization,
+  allOrganizationUserEmails: string[],
+  errorMessage: string,
+  occupiedSeatCount: number,
+): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value?.trim()) {
+      return null;
+    }
+
+    if (isDynamicSeatPlan(organization.productTierType)) {
+      return null;
+    }
+
+    const newTotalUserCount =
+      occupiedSeatCount + getUniqueNewEmailCount(allOrganizationUserEmails, control);
+
+    if (newTotalUserCount > organization.seats) {
+      return { seatLimitReached: { message: errorMessage } };
+    }
+
+    return null;
+  };
+}
+
+function getUniqueNewEmailCount(
+  allOrganizationUserEmails: string[],
+  control: AbstractControl,
+): number {
+  const newEmailsToAdd = Array.from(
+    new Set(
+      control.value
+        .split(",")
+        .filter(
+          (newEmailToAdd: string) =>
+            newEmailToAdd &&
+            newEmailToAdd.trim() !== "" &&
+            !allOrganizationUserEmails.some(
+              (existingEmail) => existingEmail === newEmailToAdd.trim(),
+            ),
+        ),
+    ),
+  );
+
+  return newEmailsToAdd.length;
+}
+
 function getUniqueInputEmails(control: AbstractControl, existingEmails: string[] = []): string[] {
   const emails: string[] = control.value
     .split(",")

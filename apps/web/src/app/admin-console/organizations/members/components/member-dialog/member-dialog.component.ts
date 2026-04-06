@@ -66,8 +66,8 @@ import {
   inputEmailLimitValidator,
   getEmailBatchLimit,
   isDynamicSeatPlan,
+  orgSeatLimitReachedValidator,
 } from "./validators/input-email-limit.validator";
-import { orgSeatLimitReachedValidator } from "./validators/org-seat-limit-reached.validator";
 import { revokedEmailsValidator } from "./validators/revoked-emails.validator";
 
 // FIXME: update to use a const object instead of a typescript enum

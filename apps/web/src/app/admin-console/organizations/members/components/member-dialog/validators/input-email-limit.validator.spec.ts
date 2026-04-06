@@ -9,6 +9,7 @@ import {
   inputEmailLimitValidator,
   isDynamicSeatPlan,
   isFixedSeatPlan,
+  orgSeatLimitReachedValidator,
 } from "./input-email-limit.validator";
 
 const orgFactory = (props: Partial<Organization> = {}) =>
@@ -176,23 +177,23 @@ describe("inputEmailLimitValidator", () => {
 
 describe("getEmailBatchLimit", () => {
   describe("dynamic-seat plan", () => {
-    it("returns 20 when remaining seats exceed the batch limit", () => {
+    it("always returns batchLimit regardless of remaining seats", () => {
       const organization = orgFactory({ productTierType: ProductTierType.Teams, seats: 100 });
 
       expect(getEmailBatchLimit(organization, 0)).toBe(20);
     });
 
-    it("returns remaining seats when below the batch limit", () => {
+    it("returns batchLimit even when seats are below the batch limit", () => {
       const organization = orgFactory({ productTierType: ProductTierType.Teams, seats: 14 });
 
-      expect(getEmailBatchLimit(organization, 0)).toBe(14);
+      expect(getEmailBatchLimit(organization, 0)).toBe(20);
     });
 
-    it("returns 0 when oversubscribed", () => {
+    it("returns batchLimit even when oversubscribed", () => {
       const organization = orgFactory({ productTierType: ProductTierType.Teams, seats: 14 });
 
-      expect(getEmailBatchLimit(organization, 14)).toBe(0);
-      expect(getEmailBatchLimit(organization, 20)).toBe(0);
+      expect(getEmailBatchLimit(organization, 14)).toBe(20);
+      expect(getEmailBatchLimit(organization, 20)).toBe(20);
     });
   });
 
@@ -214,6 +215,113 @@ describe("getEmailBatchLimit", () => {
 
       expect(getEmailBatchLimit(organization, 6)).toBe(0);
       expect(getEmailBatchLimit(organization, 8)).toBe(0);
+    });
+  });
+});
+
+describe("orgSeatLimitReachedValidator", () => {
+  const createUniqueEmailString = (numberOfEmails: number) =>
+    Array(numberOfEmails)
+      .fill(null)
+      .map((_, i) => `email${i}@example.com`)
+      .join(", ");
+
+  const createIdenticalEmailString = (numberOfEmails: number) =>
+    Array(numberOfEmails)
+      .fill(null)
+      .map(() => `email@example.com`)
+      .join(", ");
+
+  let allOrganizationUserEmails: string[];
+  let occupiedSeatCount: number;
+
+  beforeEach(() => {
+    allOrganizationUserEmails = [createUniqueEmailString(1)];
+    occupiedSeatCount = 1;
+  });
+
+  it("should return null when control value is empty", () => {
+    const validatorFn = orgSeatLimitReachedValidator(
+      null,
+      allOrganizationUserEmails,
+      "You cannot invite more than 2 members without upgrading your plan.",
+      occupiedSeatCount,
+    );
+    const control = new FormControl("");
+
+    expect(validatorFn(control)).toBeNull();
+  });
+
+  it("should return null when control value is null", () => {
+    const validatorFn = orgSeatLimitReachedValidator(
+      null,
+      allOrganizationUserEmails,
+      "You cannot invite more than 2 members without upgrading your plan.",
+      occupiedSeatCount,
+    );
+    const control = new FormControl(null);
+
+    expect(validatorFn(control)).toBeNull();
+  });
+
+  it("should return null when on dynamic seat plan", () => {
+    const organization = orgFactory({ productTierType: ProductTierType.Enterprise, seats: 100 });
+    const validatorFn = orgSeatLimitReachedValidator(
+      organization,
+      allOrganizationUserEmails,
+      "Enterprise plan dummy error.",
+      occupiedSeatCount,
+    );
+
+    expect(validatorFn(new FormControl(createUniqueEmailString(1)))).toBeNull();
+  });
+
+  it("should only count unique input email addresses", () => {
+    const organization = orgFactory({ productTierType: ProductTierType.Families, seats: 6 });
+    const validatorFn = orgSeatLimitReachedValidator(
+      organization,
+      allOrganizationUserEmails,
+      "Family plan dummy error.",
+      3,
+    );
+    const control = new FormControl(createUniqueEmailString(2) + createIdenticalEmailString(6));
+
+    expect(validatorFn(control)).toBeNull();
+  });
+
+  describe("when total occupied seat count is below plan's max count", () => {
+    test.each([
+      [ProductTierType.Free, 2],
+      [ProductTierType.Families, 6],
+      [ProductTierType.TeamsStarter, 10],
+    ])("should return null on plan %s", (plan, planSeatCount) => {
+      const organization = orgFactory({ productTierType: plan, seats: planSeatCount });
+      const validatorFn = orgSeatLimitReachedValidator(
+        organization,
+        allOrganizationUserEmails,
+        "Generic error message",
+        0,
+      );
+
+      expect(validatorFn(new FormControl(createUniqueEmailString(1)))).toBeNull();
+    });
+  });
+
+  describe("when total occupied seat count is at plan's max count", () => {
+    test.each([
+      [ProductTierType.Free, 2, 1],
+      [ProductTierType.Families, 6, 5],
+      [ProductTierType.TeamsStarter, 10, 9],
+    ])("should return null on plan %s", (plan, planSeatCount, newEmailCount) => {
+      const organization = orgFactory({ productTierType: plan, seats: planSeatCount });
+      const validatorFn = orgSeatLimitReachedValidator(
+        organization,
+        allOrganizationUserEmails,
+        "Generic error message",
+        1,
+      );
+
+      expect(validatorFn(new FormControl(createUniqueEmailString(newEmailCount)))).toBeNull();
     });
   });
 });
