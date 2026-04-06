@@ -1,4 +1,8 @@
-<ul class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4 tw-list-none tw-p-0 tw-m-0">
+@let compact = compactSpacing();
+<ul
+  class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4 tw-list-none tw-p-0 tw-m-0"
+  [ngClass]="{ 'tw-gap-y-2': compact }"
+>
   @for (item of items(); track item.labelKey) {
     <li>
       <button

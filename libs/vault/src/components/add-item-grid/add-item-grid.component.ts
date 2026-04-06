@@ -34,6 +34,7 @@ export class AddItemGridComponent {
   readonly canCreateFolder = input(false);
   readonly canCreateCollection = input(false);
   readonly canCreateSshKey = input(false);
+  readonly compactSpacing = input(false);
 
   readonly cipherSelected = output<CipherType>();
   readonly folderSelected = output();
@@ -78,5 +79,5 @@ export class AddItemGridComponent {
     return items;
   });
 
-  constructor(private readonly restrictedItemTypesService: RestrictedItemTypesService) {}
+  constructor(private readonly restrictedItemTypesService: RestrictedItemTypesService) { }
 }
