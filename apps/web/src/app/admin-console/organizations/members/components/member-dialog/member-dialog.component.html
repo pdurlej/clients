@@ -36,16 +36,10 @@
                 <bit-form-field>
                   <bit-label>{{ "email" | i18n }}</bit-label>
                   <input id="emails" type="text" appAutoFocus bitInput formControlName="emails" />
-                  @if (inviteInfo.isDynamicSeatPlan && inviteInfo.remainingSeats > 1) {
+                  @if (inviteInfo.isDynamicSeatPlan) {
                     <bit-hint>{{
                       "inviteMultipleEmailsNoSeatLimit" | i18n: inviteInfo.batchLimit
                     }}</bit-hint>
-                  }
-                  @if (inviteInfo.isDynamicSeatPlan && inviteInfo.remainingSeats === 1) {
-                    <bit-hint>{{ "inviteSingleEmailDesc" | i18n }}</bit-hint>
-                  }
-                  @if (inviteInfo.isDynamicSeatPlan && inviteInfo.remainingSeats <= 0) {
-                    <bit-hint>{{ "inviteZeroEmailDesc" | i18n }}</bit-hint>
                   }
                   @if (!inviteInfo.isDynamicSeatPlan && inviteInfo.remainingSeats > 1) {
                     <bit-hint>{{

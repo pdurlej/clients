@@ -38,6 +38,10 @@ export function getEmailBatchLimit(organization: Organization, occupiedSeatCount
   // Arbitrary limit on the number of email addresses the invite input accepts in a single submission.
   const batchLimit = 20;
 
+  if (isDynamicSeatPlan(organization.productTierType)) {
+    return batchLimit;
+  }
+
   const remainingSeats = organization.seats - occupiedSeatCount;
   return Math.min(batchLimit, Math.max(0, remainingSeats));
 }
