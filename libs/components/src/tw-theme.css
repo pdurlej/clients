@@ -279,11 +279,10 @@
   --color-bg-secondary: var(--color-gray-050);
   --color-bg-tertiary: var(--color-gray-050);
   --color-bg-quaternary: var(--color-gray-200);
-  --color-bg-gray: var(--color-gray-300);
   --color-bg-inactive: var(--color-gray-100);
 
   /* Gray Background */
-  --color-bg-gray: var(--color-gray-300);
+  --color-bg-gray: var(--color-gray-400);
   --color-bg-gray-strong: var(--color-gray-500);
 
   /* Contrast Background */
@@ -508,7 +507,6 @@
   --color-bg-secondary: var(--color-gray-800);
   --color-bg-tertiary: var(--color-gray-950);
   --color-bg-quaternary: var(--color-gray-700);
-  --color-bg-gray: var(--color-gray-600);
   --color-bg-inactive: var(--color-gray-950);
 
   /* Gray Background */
