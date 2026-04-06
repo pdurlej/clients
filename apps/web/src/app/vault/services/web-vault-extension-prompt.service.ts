@@ -93,8 +93,13 @@ export class WebVaultExtensionPromptService {
     );
 
     const now = new Date();
-    const accountAgeMs = now.getTime() - creationDate.getTime();
-    const accountAgeDays = accountAgeMs / (1000 * 60 * 60 * 24);
+    const todayUtcMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const creationUtcMs = Date.UTC(
+      creationDate.getUTCFullYear(),
+      creationDate.getUTCMonth(),
+      creationDate.getUTCDate(),
+    );
+    const accountAgeDays = (todayUtcMs - creationUtcMs) / (1000 * 60 * 60 * 24);
 
     const minAgeDays = minAccountAgeDays ?? 0;
     const maxAgeDays = 30;
