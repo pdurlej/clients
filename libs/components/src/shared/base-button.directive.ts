@@ -252,7 +252,7 @@ export const getButtonColorStyles = ({
     } else {
       baseStyles.push(
         ...baseDisabledStyles,
-        "aria-disabled:!tw-bg-bg-disabled",
+        "aria-disabled:!tw-bg-bg-inactive",
         "hover:tw-bg-bg-hover",
         "aria-disabled:tw-border-border-base",
         "aria-disabled:hover:tw-border-border-base",
